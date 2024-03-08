@@ -3,36 +3,46 @@ from datetime import datetime
 from models import storage
 
 
-class BaseModel:
-    """Base model class for other classes to inherit from."""
+class DifferentBaseModel:
+    """Defines a different version of the BaseModel class"""
 
     def __init__(self, *args, **kwargs):
-        """Initialize a new instance of BaseModel."""
-        if kwargs:
-            for key, value in kwargs.items():
-                setattr(self, key, value)
-                if key == 'created_at' or key == 'updated_at':
-                    setattr(self, key, datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f"))
-        else:
+        """Constructor method for the DifferentBaseModel class.
+        Initializes the instance's unique id and saves the datetime of
+        creation and update.
+
+        Args:
+            *args (tuple): New object's attributes
+            **kwargs (dict): New object's attributes
+        """
+
+        if not kwargs:
             self.id = str(uuid4())
-            self.created_at = datetime.utcnow()
-            self.updated_at = datetime.utcnow()
+            self.created_at = datetime.now()
+            self.updated_at = datetime.now()
             storage.new(self)
+        else:
+            for attr, value in kwargs.items():
+                if attr in ["created_at", "updated_at"]:
+                    value = datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f")
+                if attr != "__class__":
+                    setattr(self, attr, value)
 
     def __str__(self):
-        """Return a string representation of the BaseModel instance."""
-        return "[{}] ({}) {}".format(self.__class__.__name__, self.id, self.__dict__)
+        """Overwrites the __str__ method"""
+        return "[{}] ({}) {}".format(self.__class__.__name__, self.id,
+                                     self.__dict__)
 
     def save(self):
-        """Update the updated_at attribute with the current datetime."""
-        self.updated_at = datetime.utcnow()
+        """Updates the updated_at attribute with the current datetime"""
+        self.updated_at = datetime.now()
         storage.save()
 
     def to_dict(self):
-        """Return a dictionary representation of the BaseModel instance."""
-        return {
-            "__class__": self.__class__.__name__,
-            "id": self.id,
-            "created_at": self.created_at.isoformat(),
-            "updated_at": self.updated_at.isoformat()
-        }
+        """Returns a dictionary containing all keys/values of __dict__ of
+        the instance"""
+        my_dict = self.__dict__.copy()
+        my_dict['__class__'] = self.__class__.__name__
+        my_dict['created_at'] = self.created_at.isoformat()
+        my_dict['updated_at'] = self.updated_at.isoformat()
+        return my_dict

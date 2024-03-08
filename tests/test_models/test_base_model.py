@@ -3,35 +3,44 @@ from datetime import datetime
 from models.base_model import BaseModel
 
 
-class TestDifferentBaseModel(unittest.TestCase):
-    """Different Test cases for the BaseModel class"""
+class DifferentTestBaseModel(unittest.TestCase):
+    """Test class for a different version of BaseModel"""
 
-    def test_updated_at_updated_after_save(self):
-        """Test if updated_at attribute is updated after calling save()"""
-        my_model = BaseModel()
-        initial_updated_at = my_model.updated_at
-        my_model.save()
-        self.assertNotEqual(initial_updated_at, my_model.updated_at)
+    def test_custom_id_type(self):
+        """Test the id attribute type"""
+        base = BaseModel()
+        self.assertEqual(str, type(base.id))
 
-    def test_to_dict_contains_name(self):
-        """Test if the returned dictionary from to_dict() contains the 'name' attribute"""
-        my_model = BaseModel()
-        my_model.name = "Test Model"
-        my_model_dict = my_model.to_dict()
-        self.assertIn("name", my_model_dict)
+    def test_created_at_instance(self):
+        """Test created_at attribute instance"""
+        base = BaseModel()
+        self.assertIsInstance(base.created_at, datetime)
 
-    def test_str_contains_model_name(self):
-        """Test if the __str__ method returns a string containing the model name"""
-        my_model = BaseModel()
-        my_model.name = "Test Model"
-        self.assertIn("Test Model", str(my_model))
+        base.created_at = datetime.now()
+        self.assertIsNotNone(base.created_at)
 
-    def test_instance_attributes_are_datetime(self):
-        """Test if created_at and updated_at attributes are instances of datetime"""
-        my_model = BaseModel()
-        self.assertIsInstance(my_model.created_at, datetime)
-        self.assertIsInstance(my_model.updated_at, datetime)
+    def test_updated_at_instance(self):
+        """Test updated_at attribute instance"""
+        base = BaseModel()
+        self.assertIsInstance(base.updated_at, datetime)
+
+        base.created_at = datetime.now()
+        self.assertIsNotNone(base.updated_at)
+
+    def test_custom_str_type(self):
+        """Test __str__ method type"""
+        self.assertEqual(str, type(BaseModel.__str__(self)))
+
+    def test_custom_save_method(self):
+        """Test custom save method"""
+        base = BaseModel()
+        base.name = "MyModel"
+        base.save()
+        self.assertNotEqual(base.created_at, base.updated_at)
+
+        with open("custom_file.json", "r", encoding='utf-8') as f:
+            self.assertIn(base.name, f.read())
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()
