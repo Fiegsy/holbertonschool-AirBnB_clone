@@ -1,3 +1,6 @@
+import json
+import os
+
 data = {
     "BaseModel.3b9befab-16f4-4883-8214-608e85eb9de2": {
         "id": "3b9befab-16f4-4883-8214-608e85eb9de2",
@@ -34,7 +37,14 @@ data = {
         "password": "root",
         "__class__": "User"
     }
-    
 }
 
+file_path = "file.json"
 
+if not os.path.exists(file_path):
+    with open(file_path, 'w') as file:
+        json.dump(data, file)
+
+
+with open(file_path, "r") as file:
+  
