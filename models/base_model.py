@@ -1,24 +1,21 @@
-import random
+import uuid
 from datetime import datetime
-from models import storage
 
 
-class DifferentBaseModel:
-    """Defines the DifferentBaseModel class"""
+class BaseModel:
+    """Defines the BaseModel class"""
 
     def __init__(self, *args, **kwargs):
-        """Initializer for the DifferentBaseModel class"""
+        """Initializer for the BaseModel class"""
         if not kwargs:
-            self.id = str(random.randint(1000, 9999))  # Generate a random ID
+            self.id = str(uuid.uuid4())
             self.created_at = datetime.now()
             self.updated_at = datetime.now()
-            storage.new(self)
         else:
             for attr, value in kwargs.items():
                 if attr == "created_at" or attr == "updated_at":
                     value = datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f")
-                if attr != "__class__":
-                    setattr(self, attr, value)
+                setattr(self, attr, value)
 
     def __str__(self):
         """Overwrites the __str__ method"""
@@ -27,6 +24,7 @@ class DifferentBaseModel:
 
     def save(self):
         """Updates the updated_at attribute with the current datetime"""
+        from models import storage  
         self.updated_at = datetime.now()
         storage.save()
 
@@ -37,25 +35,3 @@ class DifferentBaseModel:
         my_dict['created_at'] = self.created_at.isoformat()
         my_dict['updated_at'] = self.updated_at.isoformat()
         return my_dict
-
-
-
-model1 = DifferentBaseModel()
-assert isinstance(model1.id, str)
-
-
-assert isinstance(model1.created_at, datetime)
-
-
-model2 = DifferentBaseModel()
-assert model1.id != model2.id
-
-
-assert str(model1) == f"[DifferentBaseModel] ({model1.id}) {model1.__dict__}"
-
-
-assert isinstance(model1.to_dict(), dict)
-
-
-model1.save()
-assert isinstance(model1.updated_at, datetime)
