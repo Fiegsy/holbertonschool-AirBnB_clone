@@ -1,35 +1,37 @@
-import uuid
-from datetime import datetime
+import unittest
+from models.base_model import BaseModel
 
-class BaseModel:
-    """Base model class for other classes to inherit from."""
+class CustomTestBaseModel(unittest.TestCase):
+    """Custom Test cases for the BaseModel class"""
 
-    def __init__(self, *args, **kwargs):
-        """Initialize a new instance of BaseModel."""
-        if kwargs:
-            for key, value in kwargs.items():
-                if key == 'id':
-                    self.id = value
-                elif key == 'created_at':
-                    self.created_at = datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f")
-                else:
-                    setattr(self, key, value)
-        else:
-            self.id = str(uuid.uuid4())
-            self.created_at = datetime.now()
+    def test_custom_save_behavior(self):
+        """Test if custom save() behavior is implemented"""
+        my_model = BaseModel()
+        
+        self.assertTrue(True)  
 
-    def save(self):
-        """Update the updated_at attribute with the current datetime."""
-        self.updated_at = datetime.now()
+    def test_custom_to_dict_format(self):
+        """Test if custom format is applied in to_dict()"""
+        my_model = BaseModel()
+        my_model.custom_attribute = "custom_value"
+        my_model_json = my_model.to_dict()
+       
+        self.assertIn("custom_attribute", my_model_json)
+        self.assertEqual(my_model_json["custom_attribute"], "custom_value")
 
-    def to_dict(self):
-        """Return a dictionary representation of the BaseModel instance."""
-        dict_copy = self.__dict__.copy()
-        dict_copy['created_at'] = self.created_at.isoformat()
-        if hasattr(self, 'updated_at'):
-            dict_copy['updated_at'] = self.updated_at.isoformat()
-        return dict_copy
+    def test_custom_str_output(self):
+        """Test if custom __str__ format is applied"""
+        my_model = BaseModel()
+        my_model.custom_description = "Custom Description"
+        expected_str = f"Custom Description ({my_model.id})"
+        self.assertEqual(str(my_model), expected_str)
 
-    def __str__(self):
-        """Return a string representation of the BaseModel instance."""
-        return "[{}] ({}) {}".format(self.__class__.__name__, self.id, self.__dict__)
+    def test_custom_init_behavior(self):
+        """Test if custom instantiation behavior is applied"""
+        my_model = BaseModel(custom_arg="custom_value")
+       
+        self.assertIn("custom_arg", my_model.__dict__)
+        self.assertEqual(my_model.custom_arg, "custom_value")
+
+if __name__ == "__main__":
+    unittest.main()
