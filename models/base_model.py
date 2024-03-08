@@ -37,3 +37,25 @@ class DifferentBaseModel:
         my_dict['created_at'] = self.created_at.isoformat()
         my_dict['updated_at'] = self.updated_at.isoformat()
         return my_dict
+
+
+
+model1 = DifferentBaseModel()
+assert isinstance(model1.id, str)
+
+
+assert isinstance(model1.created_at, datetime)
+
+
+model2 = DifferentBaseModel()
+assert model1.id != model2.id
+
+
+assert str(model1) == f"[DifferentBaseModel] ({model1.id}) {model1.__dict__}"
+
+
+assert isinstance(model1.to_dict(), dict)
+
+
+model1.save()
+assert isinstance(model1.updated_at, datetime)
