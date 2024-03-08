@@ -18,15 +18,15 @@ class DifferentTestFileStorage(unittest.TestCase):
 
     def test_file_path_is_string(self):
         """
-        Test if __file_path attribute is a string.
+        Test if file_path attribute is a string.
         """
-        self.assertIsInstance(self.storage._FileStorage__file_path, str)
+        self.assertIsInstance(self.storage.file_path, str)
 
     def test_objects_is_dict(self):
         """
-        Test if __objects attribute is a dictionary.
+        Test if objects attribute is a dictionary.
         """
-        self.assertIsInstance(self.storage._FileStorage__objects, dict)
+        self.assertIsInstance(self.storage.objects, dict)
 
     def test_all_returns_dict(self):
         """
