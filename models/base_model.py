@@ -12,6 +12,8 @@ class BaseModel:
             self.created_at = datetime.now()
             self.updated_at = datetime.now()
         else:
+            if '__class__' in kwargs:
+                del kwargs['__class__']  
             for attr, value in kwargs.items():
                 if attr == "created_at" or attr == "updated_at":
                     value = datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f")
