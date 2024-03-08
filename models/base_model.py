@@ -8,6 +8,8 @@ class BaseModel:
         """Initialize a new instance of BaseModel."""
         if kwargs:
             for key, value in kwargs.items():
+                if key == '__class__':
+                    continue  
                 setattr(self, key, value)
         else:
             self.id = str(uuid.uuid4())
@@ -28,9 +30,11 @@ class BaseModel:
 
     def to_dict(self):
         """Return a dictionary representation of the BaseModel instance."""
-        return {
-            "__class__": self.__class__.__name__,  # Store class name as string
+        obj_dict = {
             "id": self.id,
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat()
         }
+
+        obj_dict['__class__'] = self.__class__.__name__
+        return obj_dict
