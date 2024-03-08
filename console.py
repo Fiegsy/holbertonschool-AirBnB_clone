@@ -1,6 +1,8 @@
+#!/usr/bin/python3
 """
 Console module for HBNB project.
 """
+
 import cmd
 from models.base_model import BaseModel
 from models import storage
