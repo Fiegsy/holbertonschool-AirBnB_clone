@@ -1,46 +1,42 @@
-import unittest
-from models.engine.file_storage import FileStorage
-from models.base_model import BaseModel
+import json
+import os
+from models.base_model import BaseModel  
 
 
-class TestFileStorage(unittest.TestCase):
-    """Tests for the FileStorage class"""
+class FileStorage:
+    """Class for handling file storage"""
 
-    def test_file_path_attribute_type(self):
-        """Test the type of __file_path attribute"""
-        storage = FileStorage()
-        self.assertIsInstance(storage._FileStorage__file_path, str)
+    def __init__(self, file_path='file.json'):
+        """Initialize the FileStorage instance with a file path."""
+        self.file_path = file_path
+        self.objects = {}
 
-    def test_objects_attribute_type(self):
-        """Test the type of __objects attribute"""
-        storage = FileStorage()
-        self.assertIsInstance(storage._FileStorage__objects, dict)
+    def all(self):
+        """Return the dictionary of objects"""
+        return self.objects
 
-    def test_all_method_type(self):
-        """Test the type of the return value of the all method"""
-        storage = FileStorage()
-        self.assertIsInstance(storage.all(), dict)
+    def new(self, obj):
+        """Add a new object to the storage."""
+        key = f"{type(obj).__name__}.{obj.id}"
+        self.objects[key] = obj
 
-    def test_new_method_adds_object(self):
-        """Test if new method adds an object to __objects"""
-        storage = FileStorage()
-        base_model = BaseModel()
-        storage.new(base_model)
-        self.assertIn(base_model.__class__.__name__ + "." + base_model.id, storage.all().keys())
-        self.assertEqual(storage.all()[base_model.__class__.__name__ + "." + base_model.id], base_model)
+    def save(self):
+        """Serialize objects to JSON and save to file."""
+        serialized_objects = {}
+        for key, obj in self.objects.items():
+            serialized_objects[key] = obj.to_dict()
 
-    def test_save_method_raises_error(self):
-        """Test if save method raises TypeError"""
-        storage = FileStorage()
-        with self.assertRaises(TypeError):
-            storage.save(None)
+        with open(self.file_path, "w") as f:
+            json.dump(serialized_objects, f)
 
-    def test_reload_method_raises_error(self):
-        """Test if reload method raises TypeError"""
-        storage = FileStorage()
-        with self.assertRaises(TypeError):
-            storage.reload(None)
+    def reload(self):
+        """Deserialize JSON file and reload objects into storage."""
+        if os.path.exists(self.file_path):
+            with open(self.file_path, "r") as f:
+                serialized_objects = json.load(f)
 
-
-if __name__ == "__main__":
-    unittest.main()
+            for key, obj_data in serialized_objects.items():
+                class_name = obj_data['__class__']
+                if class_name == 'BaseModel':  
+                    new_obj = BaseModel(**obj_data)
+                    self.objects[key] = new_obj
