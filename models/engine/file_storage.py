@@ -1,6 +1,6 @@
 import json
 import os
-from models.base_model import BaseModel  # Assuming BaseModel is defined in models.base_model module
+from models.base_model import BaseModel  
 
 
 class FileStorage:
@@ -37,6 +37,6 @@ class FileStorage:
 
             for key, obj_data in serialized_objects.items():
                 class_name = obj_data['__class__']
-                if class_name == 'BaseModel':  # Check if the class is BaseModel
+                if class_name == 'BaseModel':  
                     new_obj = BaseModel(**obj_data)
                     self.objects[key] = new_obj
