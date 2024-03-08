@@ -1,13 +1,10 @@
 import cmd
-from models.engine.file_storage import FileStorage
 from models.base_model import BaseModel
+from models import storage
+
 
 class HBNBCommand(cmd.Cmd):
     prompt = "(hbnb) "
-
-    def __init__(self, storage):
-        super().__init__()
-        self.storage = storage
 
     def do_quit(self, arg):
         return True
@@ -18,86 +15,90 @@ class HBNBCommand(cmd.Cmd):
     def emptyline(self):
         pass
 
-    def do_create(self, args):
-        if not args:
+    def do_create(self, class_name):
+        if not class_name:
             print("** class name missing **")
             return
 
-        cls_name, *attr_args = args.split()
-        cls = getattr(__import__('models'), cls_name, None)
-        if not cls:
+        try:
+            new_instance = eval(class_name)()
+            new_instance.save()
+            print(new_instance.id)
+        except NameError:
             print("** class doesn't exist **")
-            return
-
-        new_instance = cls()
-        self.storage.save()
-        print(new_instance.id)
 
     def do_show(self, args):
         if not args:
             print("** class name missing **")
             return
 
-        class_name, instance_id = args.split()
-        instance_key = f"{class_name}.{instance_id}"
-        instance = self.storage.all().get(instance_key)
-        if not instance:
-            print("** no instance found **")
+        argv = args.split()
+        if len(argv) < 2:
+            print("** instance id missing **")
             return
 
-        print(instance)
+        obj_key = "{}.{}".format(argv[0], argv[1])
+        all_objects = storage.all()
+        if obj_key in all_objects:
+            print(all_objects[obj_key])
+        else:
+            print("** no instance found **")
 
     def do_destroy(self, args):
         if not args:
             print("** class name missing **")
             return
 
-        class_name, instance_id = args.split()
-        instance_key = f"{class_name}.{instance_id}"
-        instances = self.storage.all()
-        if instance_key not in instances:
-            print("** no instance found **")
+        argv = args.split()
+        if len(argv) < 2:
+            print("** instance id missing **")
             return
 
-        del instances[instance_key]
-        self.storage.save()
-
-    def do_all(self, args):
-        if args:
-            class_name = args.split()[0]
-            instances = [str(instance) for key, instance in self.storage.all().items() if key.startswith(class_name)]
-            print(instances)
+        obj_key = "{}.{}".format(argv[0], argv[1])
+        all_objects = storage.all()
+        if obj_key in all_objects:
+            del all_objects[obj_key]
+            storage.save()
         else:
-            print([str(instance) for instance in self.storage.all().values()])
+            print("** no instance found **")
+
+    def do_all(self, class_name):
+        all_objects = storage.all()
+        if not class_name:
+            print([str(obj) for obj in all_objects.values()])
+        elif class_name in {"BaseModel", "User", "State", "City", "Amenity", "Place", "Review"}:
+            print([str(obj) for obj in all_objects.values() if type(obj).__name__ == class_name])
+        else:
+            print("** class doesn't exist **")
 
     def do_update(self, args):
         if not args:
             print("** class name missing **")
             return
 
-        list_args = args.split()
-        if len(list_args) < 2:
+        argv = args.split()
+        if len(argv) < 2:
             print("** instance id missing **")
             return
 
-        instance_key = f"{list_args[0]}.{list_args[1]}"
-        instances = self.storage.all()
-        if instance_key not in instances:
+        obj_key = "{}.{}".format(argv[0], argv[1])
+        all_objects = storage.all()
+        if obj_key not in all_objects:
             print("** no instance found **")
             return
 
-        if len(list_args) < 3:
+        if len(argv) < 3:
             print("** attribute name missing **")
             return
 
-        if len(list_args) < 4:
+        if len(argv) < 4:
             print("** value missing **")
             return
 
-        setattr(instances[instance_key], list_args[2], list_args[3])
-        self.storage.save()
+        attr_name, attr_value = argv[2], argv[3]
+        setattr(all_objects[obj_key], attr_name, attr_value)
+        storage.save()
+
 
 if __name__ == '__main__':
-    storage = FileStorage()
-    storage.reload()
-    HBNBCommand(storage).cmdloop()
+    HBNBCommand().cmdloop()
