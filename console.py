@@ -1,15 +1,10 @@
-class Console:
-    def __init__(self):
-        self.commands = {
-            "create": self.create_instance,
-            "show": self.show_instance,
-            "destroy": self.destroy_instance,
-            "all": self.show_all_instances,
-            "update": self.update_instance
-        }
+from models.base_model import BaseModel
+from models import storage
 
-    def create_instance(self, args):
-        if len(args) == 0:
+class Console:
+    def do_create(self, args):
+        """Creates a new instance of a given class"""
+        if not args:
             print("** class name missing **")
             return
 
@@ -23,8 +18,9 @@ class Console:
         storage.save()
         print(new_instance.id)
 
-    def show_instance(self, args):
-        if len(args) == 0:
+    def do_show(self, args):
+        """Shows the string representation of an instance"""
+        if not args:
             print("** class name missing **")
             return
 
@@ -40,8 +36,9 @@ class Console:
 
         print(storage.all()[instance_key])
 
-    def destroy_instance(self, args):
-        if len(args) == 0:
+    def do_destroy(self, args):
+        """Deletes an instance"""
+        if not args:
             print("** class name missing **")
             return
 
@@ -58,8 +55,9 @@ class Console:
         del storage.all()[instance_key]
         storage.save()
 
-    def show_all_instances(self, args):
-        if len(args) == 0:
+    def do_all(self, args):
+        """Shows all instances of a class"""
+        if not args:
             print([str(storage.all()[id]) for id in storage.all()])
             return
 
@@ -70,8 +68,9 @@ class Console:
         instances = [str(storage.all()[id]) for id in storage.all() if args in id]
         print(instances)
 
-    def update_instance(self, args):
-        if len(args) == 0:
+    def do_update(self, args):
+        """Updates an instance attribute"""
+        if not args:
             print("** class name missing **")
             return
 
@@ -88,23 +87,18 @@ class Console:
         setattr(storage.all()[instance_key], attr_name, attr_value)
         storage.save()
 
-    def run(self):
-        while True:
-            command = input("(hbnb) ")
-            if command == "quit":
-                break
-            self.execute(command)
+    def do_quit(self, arg):
+        """Exits the console"""
+        return True
 
-    def execute(self, command):
-        parts = command.split()
-        if len(parts) == 0:
-            return
+    def do_EOF(self, arg):
+        """Exits the console with EOF (Ctrl+D)"""
+        return True
 
-        if parts[0] in self.commands:
-            self.commands[parts[0]](" ".join(parts[1:]))
-        else:
-            print("** invalid command **")
+    def emptyline(self):
+        """Handles empty line input"""
+        pass
 
 if __name__ == "__main__":
     console = Console()
-    console.run()
+    console.cmdloop()
