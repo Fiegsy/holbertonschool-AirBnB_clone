@@ -1,20 +1,94 @@
 class Console:
-    """Interactive console for handling models"""
-
     def __init__(self):
-        """Initialize the Console"""
-        self.models = {
-            "BaseModel": BaseModel,
-            "User": User,
-            "State": State,
-            "City": City,
-            "Amenity": Amenity,
-            "Place": Place,
-            "Review": Review
+        self.commands = {
+            "create": self.create_instance,
+            "show": self.show_instance,
+            "destroy": self.destroy_instance,
+            "all": self.show_all_instances,
+            "update": self.update_instance
         }
 
+    def create_instance(self, args):
+        if len(args) == 0:
+            print("** class name missing **")
+            return
+
+        class_name, *attr_args = args.split()
+        if class_name not in globals():
+            print("** class doesn't exist **")
+            return
+
+        cls = globals()[class_name]
+        new_instance = cls()
+        storage.save()
+        print(new_instance.id)
+
+    def show_instance(self, args):
+        if len(args) == 0:
+            print("** class name missing **")
+            return
+
+        class_name, instance_id = args.split()
+        if class_name not in globals():
+            print("** class doesn't exist **")
+            return
+
+        instance_key = f"{class_name}.{instance_id}"
+        if instance_key not in storage.all():
+            print("** no instance found **")
+            return
+
+        print(storage.all()[instance_key])
+
+    def destroy_instance(self, args):
+        if len(args) == 0:
+            print("** class name missing **")
+            return
+
+        class_name, instance_id = args.split()
+        if class_name not in globals():
+            print("** class doesn't exist **")
+            return
+
+        instance_key = f"{class_name}.{instance_id}"
+        if instance_key not in storage.all():
+            print("** no instance found **")
+            return
+
+        del storage.all()[instance_key]
+        storage.save()
+
+    def show_all_instances(self, args):
+        if len(args) == 0:
+            print([str(storage.all()[id]) for id in storage.all()])
+            return
+
+        if args not in globals():
+            print("** class doesn't exist **")
+            return
+
+        instances = [str(storage.all()[id]) for id in storage.all() if args in id]
+        print(instances)
+
+    def update_instance(self, args):
+        if len(args) == 0:
+            print("** class name missing **")
+            return
+
+        class_name, instance_id, attr_name, attr_value = args.split()
+        if class_name not in globals():
+            print("** class doesn't exist **")
+            return
+
+        instance_key = f"{class_name}.{instance_id}"
+        if instance_key not in storage.all():
+            print("** no instance found **")
+            return
+
+        setattr(storage.all()[instance_key], attr_name, attr_value)
+        storage.save()
+
     def run(self):
-        """Start the console"""
         while True:
             command = input("(hbnb) ")
             if command == "quit":
@@ -22,41 +96,12 @@ class Console:
             self.execute(command)
 
     def execute(self, command):
-        """Execute the given command"""
         parts = command.split()
         if len(parts) == 0:
             return
 
-        if parts[0] in self.models:
-            model = self.models[parts[0]]
-            if len(parts) > 1:
-                if parts[1] == "create":
-                    instance = model()
-                    instance.save()
-                    print(instance.id)
-                elif parts[1] == "show":
-                    if len(parts) < 3:
-                        print("** instance id missing **")
-                    else:
-                        instances = storage.all()
-                        key = "{}.{}".format(parts[0], parts[2])
-                        if key in instances:
-                            print(instances[key])
-                        else:
-                            print("** no instance found **")
-                elif parts[1] == "destroy":
-                    if len(parts) < 3:
-                        print("** instance id missing **")
-                    else:
-                        instances = storage.all()
-                        key = "{}.{}".format(parts[0], parts[2])
-                        if key in instances:
-                            del instances[key]
-                            storage.save()
-                        else:
-                            print("** no instance found **")
-            else:
-                print("** command missing **")
+        if parts[0] in self.commands:
+            self.commands[parts[0]](" ".join(parts[1:]))
         else:
             print("** invalid command **")
 
