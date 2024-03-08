@@ -1,46 +1,39 @@
-from datetime import datetime
 import random
-import hashlib
+from datetime import datetime
+from models import storage
 
 
-class UniqueBaseModel:
-    """
-    A unique base model class with custom attributes.
-    """
+class DifferentBaseModel:
+    """Defines the DifferentBaseModel class"""
 
     def __init__(self, *args, **kwargs):
-        """
-        Initializes a new instance of UniqueBaseModel with custom attributes.
-        """
-        if kwargs:
-            for key, value in kwargs.items():
-                if key != "__class__":
-                    setattr(self, key, value)
-                if key == "creation_date" or key == "last_updated":
-                    setattr(self, key, datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f"))
+        """Initializer for the DifferentBaseModel class"""
+        if not kwargs:
+            self.id = str(random.randint(1000, 9999))  # Generate a random ID
+            self.created_at = datetime.now()
+            self.updated_at = datetime.now()
+            storage.new(self)
         else:
-            self.unique_id = hashlib.sha1(str(random.getrandbits(256)).encode('utf-8')).hexdigest()
-            self.creation_date = datetime.now()
-            self.last_updated = datetime.now()
+            for attr, value in kwargs.items():
+                if attr == "created_at" or attr == "updated_at":
+                    value = datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f")
+                if attr != "__class__":
+                    setattr(self, attr, value)
 
     def __str__(self):
-        """
-        Returns a unique string representation of UniqueBaseModel instance.
-        """
-        return f"UniqueBaseModel: ID={self.unique_id}, Attributes={self.__dict__}"
+        """Overwrites the __str__ method"""
+        return "[{}] ({}) {}".format(self.__class__.__name__, self.id,
+                                     self.__dict__)
 
     def save(self):
-        """
-        Updates the last_updated attribute with the current datetime.
-        """
-        self.last_updated = datetime.now()
+        """Updates the updated_at attribute with the current datetime"""
+        self.updated_at = datetime.now()
+        storage.save()
 
     def to_dict(self):
-        """
-        Returns a dictionary containing all attributes of UniqueBaseModel instance.
-        """
-        return {
-            "unique_id": self.unique_id,
-            "creation_date": self.creation_date.isoformat(),
-            "last_updated": self.last_updated.isoformat()
-        }
+        """Returns a dictionary containing all keys/values of __dict__"""
+        my_dict = self.__dict__.copy()
+        my_dict['__class__'] = self.__class__.__name__
+        my_dict['created_at'] = self.created_at.isoformat()
+        my_dict['updated_at'] = self.updated_at.isoformat()
+        return my_dict
