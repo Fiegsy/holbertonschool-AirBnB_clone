@@ -41,10 +41,12 @@ class TestFileStorage(unittest.TestCase):
     def test_reload_method(self):
         """Test the reload() method"""
         initial_data = {"key": "value"}
-        with open(FileStorage._FileStorage__file_path, "w") as f:
+        file_path = FileStorage._FileStorage__file_path
+        with open(file_path, "w") as f:
             json.dump(initial_data, f)
         storage.reload()
-        self.assertEqual(initial_data, storage.all())
+        reloaded_data = storage.all()
+        self.assertEqual(initial_data, reloaded_data)
 
 
 if __name__ == "__main__":
