@@ -1,37 +1,44 @@
 import unittest
+from datetime import datetime
 from models.base_model import BaseModel
 
-class CustomTestBaseModel(unittest.TestCase):
-    """Custom Test cases for the BaseModel class"""
+class TestBaseModel(unittest.TestCase):
+    """Test class for BaseModel"""
 
-    def test_custom_save_behavior(self):
-        """Test if custom save() behavior is implemented"""
-        my_model = BaseModel()
-        
-        self.assertTrue(True)  
+    def test_id_type(self):
+        """Test the id attribute type"""
+        base = BaseModel()
+        self.assertIsInstance(base.id, str)
 
-    def test_custom_to_dict_format(self):
-        """Test if custom format is applied in to_dict()"""
-        my_model = BaseModel()
-        my_model.custom_attribute = "custom_value"
-        my_model_json = my_model.to_dict()
-       
-        self.assertIn("custom_attribute", my_model_json)
-        self.assertEqual(my_model_json["custom_attribute"], "custom_value")
+    def test_created_at(self):
+        """Test created_at attribute"""
+        base = BaseModel()
+        self.assertIsInstance(base.created_at, datetime)
 
-    def test_custom_str_output(self):
-        """Test if custom __str__ format is applied"""
-        my_model = BaseModel()
-        my_model.custom_description = "Custom Description"
-        expected_str = f"Custom Description ({my_model.id})"
-        self.assertEqual(str(my_model), expected_str)
+    def test_updated_at(self):
+        """Test updated_at attribute"""
+        base = BaseModel()
+        self.assertIsInstance(base.updated_at, datetime)
 
-    def test_custom_init_behavior(self):
-        """Test if custom instantiation behavior is applied"""
-        my_model = BaseModel(custom_arg="custom_value")
-       
-        self.assertIn("custom_arg", my_model.__dict__)
-        self.assertEqual(my_model.custom_arg, "custom_value")
+    def test_str_method(self):
+        """Test __str__ method"""
+        base = BaseModel()
+        self.assertEqual("[BaseModel] ({}) {}".format(base.id, base.__dict__), str(base))
 
-if __name__ == "__main__":
+    def test_save_method(self):
+        """Test save method"""
+        base = BaseModel()
+        base.name = "MyModel"
+        base.save()
+        self.assertNotEqual(base.created_at, base.updated_at)
+
+    def test_save_to_json(self):
+        """Test if attributes are saved to JSON"""
+        base = BaseModel()
+        base.name = "MyModel"
+        base.save()
+        with open("file.json", "r", encoding='utf-8') as f:
+            self.assertIn(base.name, f.read())
+
+if __name__ == '__main__':
     unittest.main()
