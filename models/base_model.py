@@ -29,7 +29,7 @@ class BaseModel:
     def to_dict(self):
         """Return a dictionary representation of the BaseModel instance."""
         return {
-            "__class__": self.__class__.__name__,
+            "__class__": self.__class__.__name__,  # Store class name as string
             "id": self.id,
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat()
