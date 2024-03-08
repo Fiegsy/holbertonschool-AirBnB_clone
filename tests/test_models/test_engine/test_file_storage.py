@@ -1,6 +1,3 @@
-#!/usr/bin/python3
-"""Unit tests for the FileStorage class"""
-
 import unittest
 import json
 import os
