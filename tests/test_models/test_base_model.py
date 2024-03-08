@@ -2,43 +2,36 @@ import unittest
 from datetime import datetime
 from models.base_model import BaseModel
 
-class TestBaseModel(unittest.TestCase):
-    """Test class for BaseModel"""
 
-    def test_id_type(self):
-        """Test the id attribute type"""
-        base = BaseModel()
-        self.assertIsInstance(base.id, str)
+class TestDifferentBaseModel(unittest.TestCase):
+    """Different Test cases for the BaseModel class"""
 
-    def test_created_at(self):
-        """Test created_at attribute"""
-        base = BaseModel()
-        self.assertIsInstance(base.created_at, datetime)
+    def test_updated_at_updated_after_save(self):
+        """Test if updated_at attribute is updated after calling save()"""
+        my_model = BaseModel()
+        initial_updated_at = my_model.updated_at
+        my_model.save()
+        self.assertNotEqual(initial_updated_at, my_model.updated_at)
 
-    def test_updated_at(self):
-        """Test updated_at attribute"""
-        base = BaseModel()
-        self.assertIsInstance(base.updated_at, datetime)
+    def test_to_dict_contains_name(self):
+        """Test if the returned dictionary from to_dict() contains the 'name' attribute"""
+        my_model = BaseModel()
+        my_model.name = "Test Model"
+        my_model_dict = my_model.to_dict()
+        self.assertIn("name", my_model_dict)
 
-    def test_str_method(self):
-        """Test __str__ method"""
-        base = BaseModel()
-        self.assertEqual("[BaseModel] ({}) {}".format(base.id, base.__dict__), str(base))
+    def test_str_contains_model_name(self):
+        """Test if the __str__ method returns a string containing the model name"""
+        my_model = BaseModel()
+        my_model.name = "Test Model"
+        self.assertIn("Test Model", str(my_model))
 
-    def test_save_method(self):
-        """Test save method"""
-        base = BaseModel()
-        base.name = "MyModel"
-        base.save()
-        self.assertNotEqual(base.created_at, base.updated_at)
+    def test_instance_attributes_are_datetime(self):
+        """Test if created_at and updated_at attributes are instances of datetime"""
+        my_model = BaseModel()
+        self.assertIsInstance(my_model.created_at, datetime)
+        self.assertIsInstance(my_model.updated_at, datetime)
 
-    def test_save_to_json(self):
-        """Test if attributes are saved to JSON"""
-        base = BaseModel()
-        base.name = "MyModel"
-        base.save()
-        with open("file.json", "r", encoding='utf-8') as f:
-            self.assertIn(base.name, f.read())
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

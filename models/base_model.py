@@ -1,50 +1,38 @@
-import uuid
+from uuid import uuid4
 from datetime import datetime
 from models import storage
 
+
 class BaseModel:
-    """Defines the BaseModel class"""
+    """Base model class for other classes to inherit from."""
 
     def __init__(self, *args, **kwargs):
-        """Constructor method for the BaseModel class.
-        Initializes the instance's unique id and saves the datetime of
-        creation and update
-
-        Args:
-            *args (tuple): New object's attributes
-            **kwargs (dict): New object's attributes
-        """
-
+        """Initialize a new instance of BaseModel."""
         if kwargs:
-            self.__dict__.update(kwargs)
-            self.created_at = self._parse_datetime(kwargs.get('created_at', datetime.now().isoformat()))
-            self.updated_at = self._parse_datetime(kwargs.get('updated_at', datetime.now().isoformat()))
+            for key, value in kwargs.items():
+                setattr(self, key, value)
+                if key == 'created_at' or key == 'updated_at':
+                    setattr(self, key, datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f"))
         else:
-            self.id = str(uuid.uuid4())
-            self.created_at = datetime.now()
-            self.updated_at = self.created_at
+            self.id = str(uuid4())
+            self.created_at = datetime.utcnow()
+            self.updated_at = datetime.utcnow()
             storage.new(self)
 
     def __str__(self):
-        """Overwrites the __str__ method"""
-        return f"[{self.__class__.__name__}] ({self.id}) {self.__dict__}"
+        """Return a string representation of the BaseModel instance."""
+        return "[{}] ({}) {}".format(self.__class__.__name__, self.id, self.__dict__)
 
     def save(self):
-        """Updates the updated_at attribute with the current datetime"""
-        self.updated_at = datetime.now()
+        """Update the updated_at attribute with the current datetime."""
+        self.updated_at = datetime.utcnow()
         storage.save()
 
     def to_dict(self):
-        """Returns a dictionary containing all keys/values of __dict__ of
-        the instance"""
+        """Return a dictionary representation of the BaseModel instance."""
         return {
-            '__class__': self.__class__.__name__,
-            'id': self.id,
-            'created_at': self.created_at.isoformat(),
-            'updated_at': self.updated_at.isoformat(),
-            **self.__dict__
+            "__class__": self.__class__.__name__,
+            "id": self.id,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat()
         }
-
-    def _parse_datetime(date_string):
-        """Parses a datetime string to a datetime object"""
-        return datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%S.%f")
