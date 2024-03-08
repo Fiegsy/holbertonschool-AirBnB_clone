@@ -27,7 +27,7 @@ class BaseModel:
         self.updated_at = datetime.now()
 
     def to_dict(self):
-        """Return a dictionary representation of the BaseModel instance."""
+        """Return a dictionary representation of the BaseModel instance"""
         return {
             "__class__": self.__class__.__name__,
             "id": self.id,
