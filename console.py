@@ -1,6 +1,11 @@
-import cmd
-from models import storage
+#!/usr/bin/python3
+"""
+Console module for HBNB project.
+"""
 
+import cmd
+from models.base_model import BaseModel
+from models import storage
 
 class HBNBCommand(cmd.Cmd):
     prompt = "(hbnb) "
@@ -21,8 +26,7 @@ class HBNBCommand(cmd.Cmd):
 
         try:
             new_instance = eval(class_name)()
-            new_instance.save()  
-            storage.save()  
+            new_instance.save()
             print(new_instance.id)
         except NameError:
             print("** class doesn't exist **")
